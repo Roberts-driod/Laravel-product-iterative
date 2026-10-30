@@ -14,7 +14,11 @@
         @foreach ($products as $product)
             <li>
                 <h3>{{ $product->name }}</h3>
-                <h3>{{ $product->price }} $</h3>
+                <p>Quantity: {{ $product->quantity }}</p>
+                <p>Description: {{ $product->description }}</p>
+                <p>Expiration: {{ $product->expiration_date }}</p>
+                <p>Status: {{ $product->status }}</p>
+                <p>Price: {{ $product->price }} $</p>
 
                 <a href="{{ route('products.show', $product) }}">Show</a>
                 <a href="{{ route('products.edit', $product) }}">Edit</a>
