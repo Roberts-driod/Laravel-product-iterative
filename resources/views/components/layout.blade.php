@@ -14,13 +14,20 @@
     <div class="layout">
 
         <header>
-            <h1>Products Application</h1>
+            <h1>MyProducts Logo</h1>
         </header>
 
-        <nav>
+        <nav class="sidebar">
             <h3>Navigation</h3>
-            <a href="{{ route('products.index') }}">Products</a>
-            <a href="{{ route('products.create') }}">Create product</a>
+
+            <ul>
+                <li>
+                    <a href="{{ route('products.index') }}">Products</a>
+                </li>
+                <li>
+                    <a href="{{ route('products.create') }}">Create product</a>
+                </li>
+            </ul>
         </nav>
 
         <main>
@@ -28,12 +35,12 @@
         </main>
 
         <aside>
-            <h3>Sidebar</h3>
-            <p>Additional information</p>
+            <h3>Advertisement</h3>
+            <p>Check out our latest products!</p>
         </aside>
 
         <footer>
-            <p>Products Application &copy; {{ date('Y') }}</p>
+            <p>&copy; {{ date('Y') }} MyProducts. All rights reserved.</p>
         </footer>
 
     </div>
