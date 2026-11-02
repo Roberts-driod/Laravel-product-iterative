@@ -31,7 +31,9 @@
         </nav>
 
         <main>
-            {{ $slot }}
+        <x-validation-errors />
+        <x-flash-message />
+        {{ $slot }}
         </main>
 
         <aside>
