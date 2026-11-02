@@ -18,4 +18,29 @@ class Product extends Model
         'price',
     ];
 
+        public function increaseQuantity(int $amount = 1): void
+    {
+        if ($amount < 1) {
+            throw new \InvalidArgumentException('Amount must be greater than zero.');
+        }
+
+        $this->increment('quantity', $amount);
+    }
+
+    public function decreaseQuantity(int $amount = 1): bool
+    {
+        if ($amount < 1) {
+            throw new \InvalidArgumentException('Amount must be greater than zero.');
+        }
+
+        $updated = static::query()
+            ->whereKey($this->getKey())
+            ->where('quantity', '>=', $amount)
+            ->decrement('quantity', $amount);
+
+        $this->refresh();
+
+        return $updated > 0;
+    }
+
 }

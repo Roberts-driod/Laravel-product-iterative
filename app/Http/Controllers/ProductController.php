@@ -77,4 +77,36 @@ class ProductController extends Controller
         return redirect()->route('products.index')
             ->with('status', 'Product deleted successfully!');
     }
+
+    public function increaseQuantity(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|integer|min:1',
+        ]);
+
+        $product->increaseQuantity($validated['amount']);
+
+        return redirect()
+            ->route('products.show', $product)
+            ->with('status', 'Product quantity increased successfully.');
+    }
+
+    public function decreaseQuantity(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|integer|min:1',
+        ]);
+
+        $success = $product->decreaseQuantity($validated['amount']);
+
+        if (!$success) {
+            return back()->withErrors([
+                'amount' => 'Not enough products in stock.',
+            ]);
+        }
+
+        return redirect()
+            ->route('products.show', $product)
+            ->with('status', 'Product quantity decreased successfully.');
+    }
 }
