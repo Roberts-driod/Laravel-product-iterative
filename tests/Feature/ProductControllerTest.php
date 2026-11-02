@@ -118,4 +118,82 @@ class ProductControllerTest extends TestCase
 
         $response->assertSessionHasErrors('name');
     }
+    
+        public function test_product_quantity_can_be_increased(): void
+    {
+        $product = Product::factory()->create([
+            'quantity' => 10,
+        ]);
+
+        $response = $this->post(
+            route('products.quantity.increase', $product),
+            ['amount' => 5]
+        );
+
+        $response->assertRedirect(route('products.show', $product));
+
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'quantity' => 15,
+        ]);
+    }
+
+    public function test_product_quantity_can_be_decreased(): void
+    {
+        $product = Product::factory()->create([
+            'quantity' => 10,
+        ]);
+
+        $response = $this->post(
+            route('products.quantity.decrease', $product),
+            ['amount' => 3]
+        );
+
+        $response->assertRedirect(route('products.show', $product));
+
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'quantity' => 7,
+        ]);
+    }
+
+    public function test_product_quantity_cannot_be_decreased_below_zero(): void
+    {
+        $product = Product::factory()->create([
+            'quantity' => 5,
+        ]);
+
+        $response = $this->from(route('products.show', $product))
+            ->post(
+                route('products.quantity.decrease', $product),
+                ['amount' => 10]
+            );
+
+        $response->assertRedirect(route('products.show', $product));
+        $response->assertSessionHasErrors('amount');
+
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'quantity' => 5,
+        ]);
+    }
+
+    public function test_quantity_change_requires_positive_amount(): void
+    {
+        $product = Product::factory()->create([
+            'quantity' => 10,
+        ]);
+
+        $response = $this->post(
+            route('products.quantity.increase', $product),
+            ['amount' => 0]
+        );
+
+        $response->assertSessionHasErrors('amount');
+
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'quantity' => 10,
+        ]);
+    }
 }
