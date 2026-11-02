@@ -118,7 +118,7 @@ class ProductControllerTest extends TestCase
 
         $response->assertSessionHasErrors('name');
     }
-    
+
         public function test_product_quantity_can_be_increased(): void
     {
         $product = Product::factory()->create([
@@ -196,4 +196,74 @@ class ProductControllerTest extends TestCase
             'quantity' => 10,
         ]);
     }
+
+
+    public function test_complete_product_management_workflow(): void
+    {
+        // 1. Izveidojam produktu
+        $response = $this->post(route('products.store'), [
+            'name' => 'Workflow Product',
+            'quantity' => 10,
+            'description' => 'Product for integration testing',
+            'expiration_date' => '2027-12-31',
+            'status' => 'active',
+            'price' => 5.99,
+        ]);
+
+        $response->assertRedirect(route('products.index'));
+
+        $product = Product::where('name', 'Workflow Product')->firstOrFail();
+
+        $this->assertSame(10, (int) $product->quantity);
+
+        // 2. Atveram produkta rediģēšanas lapu
+        $this->get(route('products.edit', $product))
+            ->assertOk();
+
+        // 3. Izmainām produkta informāciju
+        $response = $this->put(route('products.update', $product), [
+            'name' => 'Updated Workflow Product',
+            'quantity' => 10,
+            'description' => 'Updated description',
+            'expiration_date' => '2027-12-31',
+            'status' => 'active',
+            'price' => 7.99,
+        ]);
+
+        $response->assertRedirect(route('products.index'));
+
+        $product->refresh();
+
+        $this->assertSame('Updated Workflow Product', $product->name);
+        $this->assertSame(10, (int) $product->quantity);
+
+        // 4. Palielinām daudzumu par 5
+        $response = $this->post(
+            route('products.quantity.increase', $product),
+            ['amount' => 5]
+        );
+
+        $response->assertRedirect(route('products.show', $product));
+
+        $this->assertSame(15, (int) $product->fresh()->quantity);
+
+        // 5. Samazinām daudzumu par 3
+        $response = $this->post(
+            route('products.quantity.decrease', $product),
+            ['amount' => 3]
+        );
+
+        $response->assertRedirect(route('products.show', $product));
+
+        $this->assertSame(12, (int) $product->fresh()->quantity);
+
+        // 6. Pārbaudām gala rezultātu datubāzē
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'name' => 'Updated Workflow Product',
+            'quantity' => 12,
+            'price' => 7.99,
+        ]);
+    }
+    
 }
